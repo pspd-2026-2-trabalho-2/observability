@@ -1,0 +1,120 @@
+# Stack de observabilidade local: sobe os 4 serviços do backend (patient-data,
+# data-transform, auth, api-gateway) + Postgres + Prometheus + Grafana, todos na
+# mesma rede do compose, para o Prometheus fazer scrape por nome de serviço.
+#
+# Uso:
+#   cp .env.example .env   # opcional — só se quiser mudar algum valor padrão
+#   docker compose -f docker-compose.observability.yml up -d --build
+#
+# Prometheus:  http://localhost:9090  (Status > Targets deve mostrar 4 alvos UP)
+# Grafana:     http://localhost:3000  (admin/admin)
+# API Gateway: http://localhost:8090
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pspd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pspd}
+      POSTGRES_DB: ${POSTGRES_DB:-hospital}
+    ports:
+      - "5433:5432"
+    volumes:
+      - ../patient-data-service/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../patient-data-service/db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pspd} -d ${POSTGRES_DB:-hospital}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  patient-data-service:
+    build:
+      context: ../patient-data-service
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GRPC_PORT: "50051"
+      METRICS_PORT: "9090"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-pspd}:${POSTGRES_PASSWORD:-pspd}@db:5432/${POSTGRES_DB:-hospital}?sslmode=disable"
+      LOG_LEVEL: "info"
+    ports:
+      - "50051:50051"
+      - "9200:9090" # host:9200 -> evita conflitar com a UI do Prometheus (host:9090)
+
+  data-transform-service:
+    build:
+      context: ../data-transform-service
+    environment:
+      GRPC_PORT: "50053"
+      METRICS_PORT: "9091"
+      PSEUDONYM_SALT: "${PSEUDONYM_SALT:-pspd-troque-este-salt}"
+      LOG_LEVEL: "info"
+    ports:
+      - "50053:50053"
+      - "9201:9091" # host:9201 -> evita conflitar com auth-service (também 9091 interno)
+
+  auth-service:
+    build:
+      context: ../gateway-authorization-service
+      dockerfile: Dockerfile.auth
+    depends_on:
+      - patient-data-service
+    environment:
+      AUTH_GRPC_PORT: "50052"
+      AUTH_METRICS_PORT: "9091"
+      PATIENT_DATA_TARGET: "patient-data-service:50051"
+    ports:
+      - "50052:50052"
+      - "9202:9091" # host:9202 -> mesma porta interna do data-transform-service, host distinto
+
+  api-gateway:
+    build:
+      context: ../gateway-authorization-service
+      dockerfile: Dockerfile.gateway
+    depends_on:
+      - auth-service
+      - patient-data-service
+      - data-transform-service
+    environment:
+      GATEWAY_PORT: "8080"
+      JWT_SECRET: "${JWT_SECRET:-secret-key}"
+      AUTH_SERVICE_TARGET: "auth-service:50052"
+      PATIENT_DATA_TARGET: "patient-data-service:50051"
+      DATA_TRANSFORM_TARGET: "data-transform-service:50053"
+    ports:
+      - "8090:8080" # host:8090 -> evita conflito com um processo travado do Docker Desktop (wslrelay) na 8080 do host
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheusdata:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - patient-data-service
+      - data-transform-service
+      - auth-service
+      - api-gateway
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:
+  prometheusdata:
+  grafanadata:

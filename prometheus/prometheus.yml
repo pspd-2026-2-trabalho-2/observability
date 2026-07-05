@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: patient-data-service
+    static_configs:
+      - targets: ["patient-data-service:9090"]
+
+  - job_name: data-transform-service
+    static_configs:
+      - targets: ["data-transform-service:9091"]
+
+  - job_name: auth-service
+    static_configs:
+      - targets: ["auth-service:9091"]
+
+  - job_name: api-gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api-gateway:8080"]
