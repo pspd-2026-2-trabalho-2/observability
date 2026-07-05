@@ -7,3 +7,5 @@
 # Dados persistidos localmente fora dos volumes nomeados do Docker (se algum dia usados)
 prometheus-data/
 grafana-data/
+
+todo.md
