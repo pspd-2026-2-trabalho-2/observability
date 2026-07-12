@@ -20,6 +20,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
+      - ./postgres-init/00-create-keycloak-db.sql:/docker-entrypoint-initdb.d/00-create-keycloak-db.sql:ro
       - ../patient-data-service/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ../patient-data-service/db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
       - pgdata:/var/lib/postgresql/data
@@ -75,17 +76,57 @@ services:
       context: ../gateway-authorization-service
       dockerfile: Dockerfile.gateway
     depends_on:
-      - auth-service
-      - patient-data-service
-      - data-transform-service
+      auth-service:
+        condition: service_started
+      patient-data-service:
+        condition: service_started
+      data-transform-service:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
     environment:
       GATEWAY_PORT: "8080"
       JWT_SECRET: "${JWT_SECRET:-secret-key}"
       AUTH_SERVICE_TARGET: "auth-service:50052"
       PATIENT_DATA_TARGET: "patient-data-service:50051"
       DATA_TRANSFORM_TARGET: "data-transform-service:50053"
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "hu"
     ports:
       - "8090:8080" # host:8090 -> evita conflito com um processo travado do Docker Desktop (wslrelay) na 8080 do host
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+      # hostname fixo (URL completa, sintaxe hostname v2 do Keycloak 26):
+      # garante que o `iss` do token bate com KEYCLOAK_URL do gateway
+      # independente de como o cliente (k6, curl) alcançou o Keycloak (rede
+      # do compose via "keycloak:8080" ou porta publicada no host 8081)
+      KC_HOSTNAME: http://keycloak:8080
+      # Postgres em vez do H2 embutido padrão de `start-dev`: o H2 não
+      # aguenta grants de senha concorrentes para o mesmo usuário (gera
+      # "invalid_grant" falso sob carga — achado nos testes k6 da Fase 3).
+      KC_DB: postgres
+      KC_DB_URL: "jdbc:postgresql://db:5432/keycloak"
+      KC_DB_USERNAME: "${POSTGRES_USER:-pspd}"
+      KC_DB_PASSWORD: "${POSTGRES_PASSWORD:-pspd}"
+    volumes:
+      - ../keycloak/realm:/opt/keycloak/data/import:ro
+    ports:
+      - "8081:8080" # host:8081 -> evita conflito com o compose standalone do repo keycloak (host:8080)
+    healthcheck:
+      # Keycloak 26: /health/ready fica na porta de management (9000), não na 8080.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q '\"status\": \"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   prometheus:
     image: prom/prometheus:latest
