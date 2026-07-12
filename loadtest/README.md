@@ -21,10 +21,28 @@ loadtest/
 
 ## Rodar um cenário
 
+**Local:**
+
 ```bash
 cd observability
 "k6" run --env VUS=10 --env DURATION=30s loadtest/k6/smoke.js
 ```
+
+**Cluster remoto (`grupo-3`):**
+
+```bash
+cd observability
+k6 run --env TARGET=remote --env VUS=10 --env DURATION=1m \
+  --env BASE_URL=https://kiriland.unb.br/grupo3 \
+  --env KEYCLOAK_URL=https://kiriland.unb.br/keycloak \
+  --env KEYCLOAK_REALM=grupo03 \
+  --env KEYCLOAK_CLIENT=pseudopep-frontend \
+  loadtest/k6/smoke.js
+```
+
+> ⚠️ **`KEYCLOAK_CLIENT` importa muito.** Usar `admin-cli` faz o token vir
+> sem `realm_access.roles` nem `preferred_username` — o gateway nega tudo.
+> O client de aplicação correto é `pseudopep-frontend` (ver seção 3).
 
 Os 5 níveis do enunciado:
 
@@ -35,18 +53,25 @@ for vus in 10 50 100 500 1000; do
 done
 ```
 
-(criar `loadtest/resultados/` antes de rodar, se for salvar os outputs.)
+(criar `loadtest/resultados/` antes de rodar, se for salvar os outputs;
+adicionar as flags do cluster remoto acima se for o caso.)
 
 ## Variáveis de ambiente
 
 | Variável | Default | Descrição |
 |---|---|---|
+| `TARGET` | `local` | `local` ou `remote` — escolhe o conjunto de usuários de teste |
 | `BASE_URL` | `http://localhost:8090` | URL do api-gateway |
 | `KEYCLOAK_URL` | `http://localhost:8081` | URL base do Keycloak |
 | `KEYCLOAK_REALM` | `hu` | Realm |
 | `KEYCLOAK_CLIENT` | `hu-frontend` | Client público, direct grant habilitado |
+| `SAMPLE_CONDITION` | `DIABETES` | Código de condição pras chamadas de cohort |
 | `VUS` | `10` | Usuários virtuais simultâneos |
 | `DURATION` | `30s` | Duração do teste |
+
+O `patient_id` de teste **não é mais hardcoded** — `setup()` loga como
+MEDICO e descobre um paciente real via `GET /api/me/patients`, funciona
+igual em qualquer ambiente (local ou remoto têm datasets diferentes).
 
 ## O que o script faz
 
@@ -104,17 +129,27 @@ que dependem de vínculo específico (ex.: `/api/patients/{id}/history` para
 conteúdo. Se quiser cobertura mais completa, adicionar linhas de assignment
 para esses usuários no `seed.sql` do `patient-data-service` (repo irmão).
 
-### 3. Keycloak remoto (`grupo-3`) — bloqueado até correção externa
+### 3. Keycloak remoto (`grupo-3`) — RESOLVIDO, não era bug do Keycloak
 
-Testado nesta sessão: o `access_token` (e o `id_token`) emitido pelo
-Keycloak remoto (`kiriland.unb.br/keycloak`, realm `grupo03`, client
-`admin-cli`) **não carrega `realm_access.roles`** — nem pedindo o scope
-`roles` explicitamente. O gateway extrai `role=""` desse token, resultando
-em DENY sempre. **Um k6 apontado para o remoto hoje só mede erro, não carga
-real.** Este é um bloqueio externo (configuração do Keycloak do professor),
-já documentado no `todo.md` do repo `observability`. Script pronto pra
-rodar contra o remoto assim que for corrigido — só sobrescrever `BASE_URL`,
-`KEYCLOAK_URL`, `KEYCLOAK_REALM`, `KEYCLOAK_CLIENT`.
+Investigado a fundo nesta sessão: o problema nunca foi o Keycloak do
+professor. Era o **`client_id` errado**: todo mundo (inclusive o script de
+teste do colega) usava `admin-cli`, que serve só pra API administrativa do
+Keycloak e não emite `realm_access.roles` nem `preferred_username` no
+token. O client correto — já documentado (mas nunca usado) no README do
+`gateway-authorization-service` — é **`pseudopep-frontend`**, que traz a
+role certinha.
+
+Um segundo bug apareceu só depois de corrigir o primeiro: o gateway falhava
+com `connection refused` ao chamar o `authorization-service` via gRPC,
+porque o `app-config.yaml` do k8s define `AUTHORIZATION_GRPC_ADDR` (valor
+certo) mas o código Go do gateway lê `AUTH_SERVICE_TARGET` (nome
+diferente) — corrigido adicionando as chaves com o nome certo ao
+ConfigMap. Ver `k8s/manifests/configs/app-config.yaml` e `todo.md`.
+
+Validado end-to-end: `GET /grupo3/api/me/patients` com token real retorna
+`200 OK` com dados reais do banco `pseudopep_g03`. Use `--env TARGET=remote
+--env KEYCLOAK_CLIENT=pseudopep-frontend` (ver seção "Rodar um cenário"
+acima).
 
 ### 4. Keycloak local: brute-force protection desabilitado
 
