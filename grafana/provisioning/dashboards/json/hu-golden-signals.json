@@ -1,5 +1,4 @@
 {
-  "id": null,
   "panels": [
     {
       "datasource": {
@@ -321,6 +320,47 @@
         }
       ],
       "title": "Memória residente por serviço",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Nº de instâncias ativas (targets UP) por serviço. sum by(job)(up) = 1 por serviço no Compose; no cluster = nº de pods descobertos/réplicas em execução.",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "min": 0,
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (job) (up)",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Instâncias ativas por serviço",
       "type": "timeseries"
     }
   ],

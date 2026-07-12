@@ -91,6 +91,30 @@ já funcionam sem nenhum arquivo:
 3. http://localhost:3000 (`admin`/`admin`) — datasource `Prometheus` e o
    dashboard **"HU — Golden Signals"** já vêm provisionados, sem passo manual.
 
+## Painéis do dashboard
+
+Dashboard **"HU — Golden Signals"** (uid `hu-golden-signals`):
+
+| Painel | Métrica-base |
+|---|---|
+| Throughput gRPC por serviço | `grpc_server_handled_total` |
+| Latência p95 gRPC (patient-data / data-transform) | `grpc_server_handling_seconds_bucket` |
+| Taxa de erro gRPC | `grpc_server_handled_total{code!="OK"}` |
+| Consultas ao banco (req/s + erros) | `db_queries_total` |
+| Latência de consulta ao banco p95 | `db_query_duration_seconds_bucket` |
+| Transformações FHIR por operação/nível | `fhir_transforms_total` |
+| CPU por serviço | `process_cpu_seconds_total` |
+| Memória residente por serviço | `process_resident_memory_bytes` |
+| **Instâncias ativas por serviço** | **`sum by (job) (up)`** |
+
+> **Instâncias ativas por serviço** usa `sum by (job) (up)` — nº de alvos UP por
+> serviço. No Compose local vale `1` por serviço; no cluster K8s vale o nº de
+> pods/réplicas em execução. **No cluster** o painel só separa por serviço se o
+> Prometheus do k8s promover o label `app` do pod para `job` — snippet pronto em
+> [`k8s-handover/relabel-job-por-servico.md`](k8s-handover/relabel-job-por-servico.md)
+> (aplicar é do colega do K8s). Sem o relabel, o job único `pspd-pods` faz o
+> painel virar um total agregado do namespace.
+
 ## Gerando tráfego
 
 Sem tráfego, os painéis e contadores aparecem zerados:
