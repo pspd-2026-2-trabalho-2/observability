@@ -20,16 +20,22 @@ Serviços (/metrics) ──▶ Prometheus (coleta) ──▶ Grafana (visualiza)
 - Repositórios clonados **lado a lado**, na mesma pasta pai (o build usa
   caminho relativo): `patient-data-service`, `data-transform-service`,
   `gateway-authorization-service`.
+- [k6](https://k6.io) instalado, só se for gerar tráfego/rodar os testes
+  de carga (`winget install GrafanaLabs.k6`, `choco install k6`, ou o
+  binário oficial).
 
 ## Estrutura
 
 ```
-docker-compose.observability.yml   orquestra os 4 serviços + db + prometheus + grafana
+docker-compose.observability.yml   orquestra os 4 serviços + db + keycloak + prometheus + grafana
 prometheus/prometheus.yml           scrape config (4 jobs)
 grafana/provisioning/
 ├── datasources/                    datasource Prometheus (uid fixo: prometheus)
-└── dashboards/json/                dashboards carregados automaticamente
-STATUS.md                           status, painéis existentes e limitações conhecidas
+└── dashboards/json/                dashboards carregados automaticamente (HU — Golden Signals)
+keycloak/realm/hu-realm.json        realm importado automaticamente (login real via JWT)
+loadtest/k6/smoke.js                script de teste de carga (local ou cluster remoto)
+loadtest/README.md                  como rodar os testes, variáveis, limitações conhecidas
+RESULTADOS-TESTES-DE-CARGA.md       resultados consolidados das campanhas de Fase 3 e 4
 ```
 
 ## Como executar
@@ -59,6 +65,7 @@ docker compose -f docker-compose.observability.yml down -v    # reseta tudo
 | Serviço | URL |
 |---|---|
 | API Gateway | http://localhost:8090 |
+| Keycloak (login real, realm `hu`) | http://localhost:8081 (`admin`/`admin` no console) |
 | Prometheus | http://localhost:9090 |
 | Grafana | http://localhost:3000 (`admin`/`admin`) |
 | Postgres | `localhost:5433` |
@@ -79,9 +86,16 @@ já funcionam sem nenhum arquivo:
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `pspd` / `pspd` / `hospital` | banco usado pelo patient-data-service |
-| `JWT_SECRET` | `secret-key` | deve bater com o `.env` do gateway-authorization-service |
 | `PSEUDONYM_SALT` | `pspd-troque-este-salt` | deve bater com o `.env` do data-transform-service |
 | `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` | `admin` / `admin` | login do Grafana local |
+
+> `KEYCLOAK_URL`/`KEYCLOAK_REALM` do gateway já vêm fixados no
+> `docker-compose.observability.yml` (apontando para o Keycloak local
+> deste repo) — não precisam de variável própria aqui.
+>
+> **`JWT_SECRET` não existe mais** — o gateway autentica via JWKS do
+> Keycloak (`KEYCLOAK_URL`/`KEYCLOAK_REALM`), não lê mais essa variável.
+> Se você ainda tiver um `.env` antigo com `JWT_SECRET`, pode remover.
 
 ## Validar
 
@@ -109,19 +123,38 @@ Dashboard **"HU — Golden Signals"** (uid `hu-golden-signals`):
 
 > **Instâncias ativas por serviço** usa `sum by (job) (up)` — nº de alvos UP por
 > serviço. No Compose local vale `1` por serviço; no cluster K8s vale o nº de
-> pods/réplicas em execução. **No cluster** o painel só separa por serviço se o
-> Prometheus do k8s promover o label `app` do pod para `job` — snippet pronto em
-> [`k8s-handover/relabel-job-por-servico.md`](k8s-handover/relabel-job-por-servico.md)
-> (aplicar é do colega do K8s). Sem o relabel, o job único `pspd-pods` faz o
-> painel virar um total agregado do namespace.
+> pods/réplicas em execução. No cluster, isso depende do Prometheus promover o
+> label `app` do pod para `job` (relabel `__meta_kubernetes_pod_label_app` →
+> `job`) — já aplicado e commitado no repo `k8s`
+> (`manifests/monitoring/prometheus.yaml`). Sem esse relabel, o job único
+> `pspd-pods` faria o painel virar um total agregado do namespace.
 
 ## Gerando tráfego
 
-Sem tráfego, os painéis e contadores aparecem zerados:
+Sem tráfego, os painéis e contadores aparecem zerados. O gateway só aceita
+JWT real emitido pelo Keycloak (JWKS) — não dá mais para fabricar um token
+à mão. Duas formas de gerar tráfego real:
+
+**1. Teste de carga com k6** (recomendado — já faz login de verdade e
+exercita várias rotas):
 
 ```bash
-# Gera um token de teste em https://jwt.io (payload {"username":"med.cardoso","role":"MEDICO"}, secret "secret-key")
-curl -H "Authorization: Bearer <TOKEN>" "http://localhost:8090/api/patients?patient_id=P000005"
+k6 run --env VUS=10 --env DURATION=30s loadtest/k6/smoke.js
+```
+
+Detalhes completos (rodar contra o cluster remoto, variáveis, 5 níveis do
+enunciado, limitações conhecidas): [loadtest/README.md](loadtest/README.md).
+Resultados já coletados: [RESULTADOS-TESTES-DE-CARGA.md](RESULTADOS-TESTES-DE-CARGA.md).
+
+**2. `curl` manual**, pegando um token real do Keycloak primeiro:
+
+```bash
+TOKEN=$(curl -s -X POST "http://localhost:8081/realms/hu/protocol/openid-connect/token" \
+  -d "grant_type=password" -d "client_id=hu-frontend" \
+  -d "username=med.cardoso" -d "password=pspd123" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8090/api/me/patients"
 ```
 
 ## Integrando outro serviço
@@ -140,5 +173,25 @@ curl -H "Authorization: Bearer <TOKEN>" "http://localhost:8090/api/patients?pati
 
 ## Status e limitações
 
-O que já está pronto, os painéis existentes e as limitações conhecidas de
-cada serviço ficam em [STATUS.md](STATUS.md).
+Fases 0-4 do enunciado (rede unificada, coleta, dashboard, testes de
+carga, autoscaling) concluídas — resultados completos em
+[RESULTADOS-TESTES-DE-CARGA.md](RESULTADOS-TESTES-DE-CARGA.md). Painéis
+do dashboard: ver seção acima.
+
+Limitações conhecidas (por design ou por escopo — não são bugs deste
+repositório):
+
+- **auth-service** usa uma biblioteca de métricas diferente
+  (`go-grpc-prometheus`), com labels próprios (`grpc_service`,
+  `grpc_method`, `grpc_code`) em vez de (`service`, `method`, `code`) dos
+  outros dois serviços gRPC. Tratado como query separada no painel de
+  erro; não aparece no painel de latência (não habilita o histograma).
+- **api-gateway** só expõe métricas padrão de processo Go — sem
+  `http_requests_total`/`http_request_duration_seconds`. Throughput e
+  latência da borda são inferidos pelos contadores gRPC downstream.
+  (Mudança necessária no `gateway-authorization-service`, fora deste
+  repo.)
+- 3 RPCs de streaming do `patient-data-service`
+  (`ListPatientsByDoctor`/`ListSupervisedPatients`/`ListCohortPatients`)
+  não aparecem em `grpc_server_handled_total` — o interceptor de métricas
+  só cobre chamadas unary. (Mudança necessária no `patient-data-service`.)
