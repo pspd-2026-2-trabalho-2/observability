@@ -1,6 +1,19 @@
 {
   "panels": [
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "panels": [],
+      "title": "Visão geral / gRPC",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -15,7 +28,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 1,
       "options": {
@@ -30,7 +43,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(grpc_server_handled_total[$agrupamento]))",
+          "expr": "sum by (job) (rate(grpc_server_handled_total{namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -53,7 +66,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 1
       },
       "id": 2,
       "options": {
@@ -68,7 +81,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(grpc_server_handling_seconds_bucket{job=~\"patient-data-service|data-transform-service\"}[$agrupamento])))",
+          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(grpc_server_handling_seconds_bucket{job=~\"(.*/)?(patient-data-service|data-transform-service)\", namespace=~\"$k8s_namespace|\"}[$agrupamento])))",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -91,7 +104,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "id": 3,
       "options": {
@@ -106,7 +119,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(grpc_server_handled_total{job!=\"auth-service\", code!=\"OK\"}[$agrupamento]))",
+          "expr": "sum by (job) (rate(grpc_server_handled_total{job!~\"(.*/)?auth-service\", code!=\"OK\", namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{job}} error",
           "refId": "A"
         },
@@ -115,13 +128,26 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(grpc_server_handled_total{job=\"auth-service\", grpc_code!=\"OK\"}[$agrupamento]))",
+          "expr": "sum by (job) (rate(grpc_server_handled_total{job=~\"(.*/)?auth-service\", grpc_code!=\"OK\", namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{job}} error",
           "refId": "B"
         }
       ],
       "title": "Taxa de erro gRPC",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 101,
+      "panels": [],
+      "title": "Banco de Dados",
+      "type": "row"
     },
     {
       "datasource": {
@@ -137,8 +163,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 8
+        "x": 0,
+        "y": 18
       },
       "id": 4,
       "options": {
@@ -153,7 +179,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (query) (rate(db_queries_total[$agrupamento]))",
+          "expr": "sum by (query) (rate(db_queries_total{namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{query}} ok",
           "refId": "A"
         },
@@ -162,7 +188,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (query) (rate(db_queries_total{status=\"error\"}[$agrupamento]))",
+          "expr": "sum by (query) (rate(db_queries_total{status=\"error\", namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{query}} error",
           "refId": "B"
         }
@@ -184,8 +210,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 16
+        "x": 12,
+        "y": 18
       },
       "id": 5,
       "options": {
@@ -200,13 +226,26 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, query) (rate(db_query_duration_seconds_bucket[$agrupamento])))",
+          "expr": "histogram_quantile(0.95, sum by (le, query) (rate(db_query_duration_seconds_bucket{namespace=~\"$k8s_namespace|\"}[$agrupamento])))",
           "legendFormat": "{{query}}",
           "refId": "A"
         }
       ],
       "title": "Latência de consulta ao banco (p95)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 102,
+      "panels": [],
+      "title": "FHIR",
+      "type": "row"
     },
     {
       "datasource": {
@@ -221,9 +260,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
+        "w": 24,
+        "x": 0,
+        "y": 27
       },
       "id": 6,
       "options": {
@@ -238,13 +277,26 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (operation, level) (rate(fhir_transforms_total[$agrupamento]))",
+          "expr": "sum by (operation, level) (rate(fhir_transforms_total{namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{operation}} ({{level}})",
           "refId": "A"
         }
       ],
       "title": "Transformações FHIR por operação/nível",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 103,
+      "panels": [],
+      "title": "Infraestrutura",
+      "type": "row"
     },
     {
       "datasource": {
@@ -261,7 +313,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 36
       },
       "id": 7,
       "options": {
@@ -276,7 +328,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(process_cpu_seconds_total[$agrupamento]))",
+          "expr": "sum by (job) (rate(process_cpu_seconds_total{namespace=~\"$k8s_namespace|\"}[$agrupamento]))",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -299,7 +351,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 36
       },
       "id": 8,
       "options": {
@@ -314,7 +366,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "process_resident_memory_bytes",
+          "expr": "process_resident_memory_bytes{namespace=~\"$k8s_namespace|\"}",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -340,7 +392,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 44
       },
       "id": 9,
       "options": {
@@ -355,7 +407,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (job) (up)",
+          "expr": "sum by (job) (up{namespace=~\"$k8s_namespace|\"})",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -381,7 +433,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 44
       },
       "id": 10,
       "options": {
@@ -390,7 +442,9 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -402,7 +456,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(up{job=\"api-gateway\"})",
+          "expr": "sum(up{job=~\"(.*/)?api-gateway\", namespace=~\"$k8s_namespace|\"})",
           "legendFormat": "api-gateway",
           "refId": "A"
         }
@@ -442,21 +496,60 @@
         "label": "Agrupamento (janela de rate)",
         "name": "agrupamento",
         "options": [
-          { "text": "1m", "value": "1m" },
-          { "text": "2m", "value": "2m" },
-          { "text": "5m", "value": "5m" },
-          { "text": "10m", "value": "10m" },
-          { "text": "30m", "value": "30m" },
-          { "text": "1h", "value": "1h" },
-          { "text": "6h", "value": "6h" },
-          { "text": "12h", "value": "12h" },
-          { "text": "1d", "value": "1d" }
+          {
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "text": "2m",
+            "value": "2m"
+          },
+          {
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "text": "1d",
+            "value": "1d"
+          }
         ],
         "query": "1m,2m,5m,10m,30m,1h,6h,12h,1d",
         "queryValue": "",
         "refresh": 2,
         "skipUrlSync": false,
         "type": "interval"
+      },
+      {
+        "current": {
+          "text": "grupo-3",
+          "value": "grupo-3"
+        },
+        "hide": 0,
+        "label": "Namespace (K8s)",
+        "name": "k8s_namespace",
+        "query": "grupo-3",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   },
@@ -465,6 +558,6 @@
     "to": "now"
   },
   "timezone": "browser",
-  "title": "HU — Golden Signals",
+  "title": "HU — Golden Signals (Grupo 3)",
   "uid": "hu-golden-signals"
 }
