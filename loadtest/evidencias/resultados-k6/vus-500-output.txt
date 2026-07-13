@@ -1,0 +1,370 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: loadtest/k6/smoke.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 500 max VUs, 1m30s max duration (incl. graceful stop):
+              * default: 500 looping VUs for 1m0s (gracefulStop: 30s)
+
+
+running (0m01.0s), 500/500 VUs, 0 complete and 0 interrupted iterations
+default   [   1% ] 500 VUs  0m00.7s/1m0s
+
+running (0m02.0s), 500/500 VUs, 6 complete and 0 interrupted iterations
+default   [   3% ] 500 VUs  0m01.7s/1m0s
+
+running (0m03.0s), 500/500 VUs, 352 complete and 0 interrupted iterations
+default   [   4% ] 500 VUs  0m02.7s/1m0s
+
+running (0m04.0s), 500/500 VUs, 730 complete and 0 interrupted iterations
+default   [   6% ] 500 VUs  0m03.7s/1m0s
+
+running (0m05.0s), 500/500 VUs, 1158 complete and 0 interrupted iterations
+default   [   8% ] 500 VUs  0m04.7s/1m0s
+
+running (0m06.0s), 500/500 VUs, 1591 complete and 0 interrupted iterations
+default   [   9% ] 500 VUs  0m05.7s/1m0s
+
+running (0m07.0s), 500/500 VUs, 2024 complete and 0 interrupted iterations
+default   [  11% ] 500 VUs  0m06.7s/1m0s
+
+running (0m08.0s), 500/500 VUs, 2456 complete and 0 interrupted iterations
+default   [  13% ] 500 VUs  0m07.7s/1m0s
+
+running (0m09.0s), 500/500 VUs, 2891 complete and 0 interrupted iterations
+default   [  14% ] 500 VUs  0m08.7s/1m0s
+
+running (0m10.0s), 500/500 VUs, 3322 complete and 0 interrupted iterations
+default   [  16% ] 500 VUs  0m09.7s/1m0s
+
+running (0m11.0s), 500/500 VUs, 3753 complete and 0 interrupted iterations
+default   [  18% ] 500 VUs  0m10.7s/1m0s
+
+running (0m12.0s), 500/500 VUs, 4187 complete and 0 interrupted iterations
+default   [  19% ] 500 VUs  0m11.7s/1m0s
+
+running (0m13.0s), 500/500 VUs, 4620 complete and 0 interrupted iterations
+default   [  21% ] 500 VUs  0m12.7s/1m0s
+
+running (0m14.0s), 500/500 VUs, 5057 complete and 0 interrupted iterations
+default   [  23% ] 500 VUs  0m13.7s/1m0s
+
+running (0m15.0s), 500/500 VUs, 5490 complete and 0 interrupted iterations
+default   [  24% ] 500 VUs  0m14.7s/1m0s
+
+running (0m16.0s), 500/500 VUs, 5917 complete and 0 interrupted iterations
+default   [  26% ] 500 VUs  0m15.7s/1m0s
+
+running (0m17.0s), 500/500 VUs, 6352 complete and 0 interrupted iterations
+default   [  28% ] 500 VUs  0m16.7s/1m0s
+
+running (0m18.0s), 500/500 VUs, 6789 complete and 0 interrupted iterations
+default   [  29% ] 500 VUs  0m17.7s/1m0s
+
+running (0m19.0s), 500/500 VUs, 7225 complete and 0 interrupted iterations
+default   [  31% ] 500 VUs  0m18.7s/1m0s
+
+running (0m20.0s), 500/500 VUs, 7662 complete and 0 interrupted iterations
+default   [  33% ] 500 VUs  0m19.7s/1m0s
+
+running (0m21.0s), 500/500 VUs, 7893 complete and 0 interrupted iterations
+default   [  34% ] 500 VUs  0m20.7s/1m0s
+time="2026-07-13T16:09:14-03:00" level=warning msg="Request Failed" error="Post \"https://kiriland.unb.br/keycloak/realms/grupo03/protocol/openid-connect/token\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:09:14-03:00" level=warning msg="Request Failed" error="Post \"https://kiriland.unb.br/keycloak/realms/grupo03/protocol/openid-connect/token\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:09:14-03:00" level=warning msg="Request Failed" error="Post \"https://kiriland.unb.br/keycloak/realms/grupo03/protocol/openid-connect/token\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:09:14-03:00" level=warning msg="Request Failed" error="Post \"https://kiriland.unb.br/keycloak/realms/grupo03/protocol/openid-connect/token\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:09:14-03:00" level=warning msg="Request Failed" error="Post \"https://kiriland.unb.br/keycloak/realms/grupo03/protocol/openid-connect/token\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+
+running (0m22.0s), 500/500 VUs, 8328 complete and 0 interrupted iterations
+default   [  36% ] 500 VUs  0m21.7s/1m0s
+
+running (0m23.0s), 500/500 VUs, 8767 complete and 0 interrupted iterations
+default   [  38% ] 500 VUs  0m22.7s/1m0s
+
+running (0m24.0s), 500/500 VUs, 9205 complete and 0 interrupted iterations
+default   [  39% ] 500 VUs  0m23.7s/1m0s
+
+running (0m25.0s), 500/500 VUs, 9643 complete and 0 interrupted iterations
+default   [  41% ] 500 VUs  0m24.7s/1m0s
+
+running (0m26.0s), 500/500 VUs, 10082 complete and 0 interrupted iterations
+default   [  43% ] 500 VUs  0m25.7s/1m0s
+
+running (0m27.0s), 500/500 VUs, 10519 complete and 0 interrupted iterations
+default   [  44% ] 500 VUs  0m26.7s/1m0s
+
+running (0m28.0s), 500/500 VUs, 10957 complete and 0 interrupted iterations
+default   [  46% ] 500 VUs  0m27.7s/1m0s
+
+running (0m29.0s), 500/500 VUs, 11082 complete and 0 interrupted iterations
+default   [  48% ] 500 VUs  0m28.7s/1m0s
+
+running (0m30.0s), 500/500 VUs, 11515 complete and 0 interrupted iterations
+default   [  49% ] 500 VUs  0m29.7s/1m0s
+
+running (0m31.0s), 500/500 VUs, 11953 complete and 0 interrupted iterations
+default   [  51% ] 500 VUs  0m30.7s/1m0s
+
+running (0m32.0s), 500/500 VUs, 12392 complete and 0 interrupted iterations
+default   [  53% ] 500 VUs  0m31.7s/1m0s
+
+running (0m33.0s), 500/500 VUs, 12833 complete and 0 interrupted iterations
+default   [  54% ] 500 VUs  0m32.7s/1m0s
+
+running (0m34.0s), 500/500 VUs, 13272 complete and 0 interrupted iterations
+default   [  56% ] 500 VUs  0m33.7s/1m0s
+
+running (0m35.0s), 500/500 VUs, 13711 complete and 0 interrupted iterations
+default   [  58% ] 500 VUs  0m34.7s/1m0s
+
+running (0m36.0s), 500/500 VUs, 14150 complete and 0 interrupted iterations
+default   [  59% ] 500 VUs  0m35.7s/1m0s
+
+running (0m37.0s), 500/500 VUs, 14608 complete and 0 interrupted iterations
+default   [  61% ] 500 VUs  0m36.7s/1m0s
+
+running (0m38.0s), 500/500 VUs, 15089 complete and 0 interrupted iterations
+default   [  63% ] 500 VUs  0m37.7s/1m0s
+
+running (0m39.0s), 500/500 VUs, 15528 complete and 0 interrupted iterations
+default   [  64% ] 500 VUs  0m38.7s/1m0s
+
+running (0m40.0s), 500/500 VUs, 15959 complete and 0 interrupted iterations
+default   [  66% ] 500 VUs  0m39.7s/1m0s
+
+running (0m41.0s), 500/500 VUs, 16389 complete and 0 interrupted iterations
+default   [  68% ] 500 VUs  0m40.7s/1m0s
+
+running (0m42.0s), 500/500 VUs, 16819 complete and 0 interrupted iterations
+default   [  69% ] 500 VUs  0m41.7s/1m0s
+
+running (0m43.0s), 500/500 VUs, 17254 complete and 0 interrupted iterations
+default   [  71% ] 500 VUs  0m42.7s/1m0s
+
+running (0m44.0s), 500/500 VUs, 17681 complete and 0 interrupted iterations
+default   [  73% ] 500 VUs  0m43.7s/1m0s
+
+running (0m45.0s), 500/500 VUs, 18115 complete and 0 interrupted iterations
+default   [  74% ] 500 VUs  0m44.7s/1m0s
+
+running (0m46.0s), 500/500 VUs, 18554 complete and 0 interrupted iterations
+default   [  76% ] 500 VUs  0m45.7s/1m0s
+
+running (0m47.0s), 500/500 VUs, 18993 complete and 0 interrupted iterations
+default   [  78% ] 500 VUs  0m46.7s/1m0s
+
+running (0m48.0s), 500/500 VUs, 19429 complete and 0 interrupted iterations
+default   [  79% ] 500 VUs  0m47.7s/1m0s
+
+running (0m49.0s), 500/500 VUs, 19865 complete and 0 interrupted iterations
+default   [  81% ] 500 VUs  0m48.7s/1m0s
+
+running (0m50.0s), 500/500 VUs, 20300 complete and 0 interrupted iterations
+default   [  83% ] 500 VUs  0m49.7s/1m0s
+
+running (0m51.0s), 500/500 VUs, 20731 complete and 0 interrupted iterations
+default   [  85% ] 500 VUs  0m50.7s/1m0s
+
+running (0m52.0s), 500/500 VUs, 21170 complete and 0 interrupted iterations
+default   [  86% ] 500 VUs  0m51.7s/1m0s
+
+running (0m53.0s), 500/500 VUs, 21606 complete and 0 interrupted iterations
+default   [  88% ] 500 VUs  0m52.7s/1m0s
+
+running (0m54.0s), 500/500 VUs, 22066 complete and 0 interrupted iterations
+default   [  89% ] 500 VUs  0m53.7s/1m0s
+
+running (0m55.0s), 500/500 VUs, 22515 complete and 0 interrupted iterations
+default   [  91% ] 500 VUs  0m54.7s/1m0s
+
+running (0m56.0s), 500/500 VUs, 22944 complete and 0 interrupted iterations
+default   [  93% ] 500 VUs  0m55.7s/1m0s
+
+running (0m57.0s), 500/500 VUs, 23369 complete and 0 interrupted iterations
+default   [  94% ] 500 VUs  0m56.7s/1m0s
+
+running (0m58.0s), 500/500 VUs, 23793 complete and 0 interrupted iterations
+default   [  96% ] 500 VUs  0m57.7s/1m0s
+
+running (0m59.0s), 500/500 VUs, 24218 complete and 0 interrupted iterations
+default   [  98% ] 500 VUs  0m58.7s/1m0s
+
+running (1m00.0s), 500/500 VUs, 24622 complete and 0 interrupted iterations
+default   [  99% ] 500 VUs  0m59.7s/1m0s
+
+running (1m01.0s), 308/500 VUs, 24875 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m02.0s), 097/500 VUs, 25086 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m03.0s), 063/500 VUs, 25120 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m04.0s), 037/500 VUs, 25146 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m05.0s), 034/500 VUs, 25149 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m06.0s), 034/500 VUs, 25149 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m07.0s), 033/500 VUs, 25150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m08.0s), 030/500 VUs, 25153 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m09.0s), 030/500 VUs, 25153 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m10.0s), 030/500 VUs, 25153 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m11.0s), 030/500 VUs, 25153 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m12.0s), 029/500 VUs, 25154 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m13.0s), 029/500 VUs, 25154 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m14.0s), 029/500 VUs, 25154 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m15.0s), 029/500 VUs, 25154 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m16.0s), 024/500 VUs, 25159 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m17.0s), 022/500 VUs, 25161 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m18.0s), 020/500 VUs, 25163 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m19.0s), 017/500 VUs, 25166 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+time="2026-07-13T16:10:12-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:12-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/supervised-patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+
+running (1m20.0s), 016/500 VUs, 25167 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/patients/P030000010/history\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/supervised-patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/patients/P030000010/history\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/cohorts/DIABETES/exams\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/patients/P030000010/history\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/cohorts/DIABETES/exams\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/cohorts/DIABETES/statistics\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+time="2026-07-13T16:10:13-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/cohorts/DIABETES/statistics\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+
+running (1m21.0s), 014/500 VUs, 25169 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m22.0s), 008/500 VUs, 25175 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m23.0s), 006/500 VUs, 25177 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+time="2026-07-13T16:10:16-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/supervised-patients\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+
+running (1m24.0s), 006/500 VUs, 25177 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m25.0s), 005/500 VUs, 25178 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m26.0s), 005/500 VUs, 25178 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m27.0s), 005/500 VUs, 25178 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+time="2026-07-13T16:10:20-03:00" level=warning msg="Request Failed" error="Get \"https://kiriland.unb.br/grupo3/api/me/projects\": dial tcp 164.41.20.252:443: connectex: Uma tentativa de conexão falhou porque o componente conectado não respondeu\r\ncorretamente após um período de tempo ou a conexão estabelecida falhou\r\nporque o host conectado não respondeu."
+
+running (1m28.0s), 005/500 VUs, 25178 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m29.0s), 004/500 VUs, 25179 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+running (1m30.0s), 004/500 VUs, 25179 complete and 0 interrupted iterations
+default ↓ [ 100% ] 500 VUs  1m0s
+
+
+  █ THRESHOLDS 
+
+    http_req_failed
+    ✓ 'rate<1.0' rate=98.47%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 67851  751.597525/s
+    checks_succeeded...: 97.51% 66166 out of 67851
+    checks_failed......: 2.48%  1685 out of 67851
+
+    ✗ login: status 200
+      ↳  99% — ✓ 501 / ✗ 5
+    ✗ login: access_token presente
+      ↳  99% — ✓ 501 / ✗ 5
+    ✗ get_patient_history: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 8466 / ✗ 223
+    ✗ get_patient: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 8099 / ✗ 205
+    ✗ get_cohort_statistics: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 7993 / ✗ 192
+    ✗ get_supervised_patients: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 8464 / ✗ 223
+    ✗ get_cohort_exams: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 7981 / ✗ 202
+    ✗ get_patient_summary: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 8093 / ✗ 211
+    ✗ get_my_patients: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 8091 / ✗ 213
+    ✗ get_my_projects: respondeu (2xx, 403 ou 429 são esperados)
+      ↳  97% — ✓ 7977 / ✗ 206
+
+    CUSTOM
+    auth_login_duration............: avg=125.42ms min=0s     med=113.1ms max=450.4ms p(90)=222.01ms p(95)=261.47ms
+    gateway_denied_rate............: 0.16%  109 out of 66839
+    gateway_error_rate.............: 2.50%  1675 out of 66839
+    gateway_rate_limited_rate......: 96.54% 64528 out of 66839
+    gateway_req_duration...........: avg=20.64ms  min=0s     med=4ms     max=34.62s  p(90)=5.11ms   p(95)=9.68ms  
+    gateway_requests_total.........: 66839  740.387422/s
+    login_error_rate...............: 0.98%  5 out of 506
+
+    HTTP
+    http_req_duration..............: avg=21.43ms  min=0s     med=4ms     max=34.62s  p(90)=5.19ms   p(95)=12.1ms  
+      { expected_response:true }...: avg=300.16ms min=6.11ms med=89.78ms max=3.37s   p(90)=350.07ms p(95)=2.26s   
+    http_req_failed................: 98.47% 66317 out of 67346
+    http_reqs......................: 67346  746.003551/s
+
+    EXECUTION
+    iteration_duration.............: avg=1.23s    min=1s     med=1.01s   max=36.83s  p(90)=1.03s    p(95)=1.95s   
+    iterations.....................: 25179  278.912235/s
+    vus............................: 4      min=4              max=500
+    vus_max........................: 500    min=500            max=500
+
+    NETWORK
+    data_received..................: 32 MB  356 kB/s
+    data_sent......................: 120 MB 1.3 MB/s
+
+
+
+
+running (1m30.3s), 000/500 VUs, 25179 complete and 4 interrupted iterations
+default ✓ [ 100% ] 500 VUs  1m0s

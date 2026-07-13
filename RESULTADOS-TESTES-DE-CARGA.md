@@ -50,8 +50,6 @@ nível — stack local ficou estável do início ao fim.
 - O **Keycloak local (dev-mode)** começa a falhar login sob rajada em
   VUS≥500 (36%→51% de erro) — limitação do ambiente de teste (H2/instância
   única em modo dev), não da aplicação.
-- Detalhes completos, análise por métrica e limitações da metodologia:
-  `evidencias-fase3-k6/fase3-testes-de-carga.md`.
 
 ## 2. Fase 3 — Campanha remota, antes da correção do bug
 
@@ -133,6 +131,58 @@ rodando com só 1 pod de fato (quota do namespace impediu o HPA de
 completar o scale-up — ver seção 5), e o Keycloak remoto satura sob
 rajada de login nesse nível, mesmo padrão já visto na campanha local.
 
+### Campanha repetida — confirma reprodutibilidade
+
+Os 5 níveis foram rodados **uma segunda vez**, horas depois no mesmo dia
+(tarde de 2026-07-13), com tudo já commitado e estável (sem debugging no
+meio, diferente da primeira validação):
+
+| VUs | req/s | latência gateway avg / p95 (ms) | erro infra (%) | rate-limited (%) | DENY (%) | erro login (%) | Restart necessário? |
+|---:|---:|---:|---:|---:|---:|---:|:---:|
+| 10   | 19,0  | 102,78 / 196,51 | 0,00 | 49,37 | 11,65 | 0,00  | Não |
+| 50   | 110,2 | 41,48 / 15,80   | 0,00 | 91,14 | 2,54  | 1,92  | Não |
+| 100  | 229,8 | 25,18 / 10,32   | 0,00 | 95,72 | 0,89  | 2,88  | Não |
+| 500  | 740,4 | 20,64 / 9,68    | 2,50 | 96,54 | 0,16  | 0,98  | Não |
+| 1000 | 583,8 | 318,75 / 32,37  | 5,14 | 93,47 | 0,21  | 12,42 | Não |
+
+**Mesma conclusão da primeira validação, confirmada**: `patient-data-service`
+com **0 restarts nos 5 níveis**, novamente. O erro em 500/1000 variou um
+pouco entre as duas rodadas (2,50%/5,14% aqui vs. 0,01%/4,45% antes) — a
+diferença é explicada pelo estado inicial do `api-gateway-hpa` (na segunda
+rodada, o gateway já estava em 59% de CPU antes mesmo de começar o
+VUS=500, então escalou e bateu na quota mais cedo). Continua sendo
+saturação do gateway com 1 pod real, não o bug de conexão — reforça que o
+fix é estável ao longo do tempo, não um acaso de uma execução só.
+
+### Evidência visual — dashboard "HU — Golden Signals" (Grafana do grupo, `grupo-3`)
+
+Capturado durante a janela da campanha repetida (15:53–16:22, 2026-07-13),
+filtro `Namespace = grupo-3`, agrupamento de 1m:
+
+![Dashboard HU — Golden Signals: throughput gRPC, latência p95, taxa de erro, consultas e latência de banco](loadtest/evidencias/grafana-teste-carga-1.png)
+
+Throughput e latência sobem junto com o início dos testes (~16:05) e
+voltam à base quando cada nível termina — visível principalmente nos
+painéis de gRPC e de consultas ao banco. A "Taxa de erro gRPC" mostra o
+`authorization-service` (única série com dados) oscilando, consistente
+com o `gateway_denied_rate`/rate-limiting observado nos outputs do k6.
+
+![Dashboard HU — Golden Signals: transformações FHIR, CPU/memória por serviço, instâncias ativas e pods disponíveis do gateway](loadtest/evidencias/grafana-teste-carga-2.png)
+
+CPU e memória por serviço acompanham a carga (pico visível em
+`api-gateway`/`patient-data-service` entre 16:05 e 16:15). O painel
+"Instâncias ativas por serviço" mostra breves quedas a 0 no
+`authorization-service` durante a janela de maior carga — consistente com
+o gap de scrape do Prometheus sob rajada, não com o serviço caindo (não
+houve restart, confirmado via `kubectl` durante o teste). O painel "Pods
+disponíveis (API Gateway)" é novo desde a última verificação deste
+documento (adicionado ao dashboard depois da campanha, commits
+`fix: ajustando e organizando o dashboard de golden signals` /
+`fix: adicionando variaveis ao nosso dashboard` no histórico do repo) —
+mostra o `api-gateway` tentando escalar acima de 1 réplica durante o
+teste, reforçando visualmente o achado da seção 5 (HPA reage de verdade,
+mas fica limitado pela quota do namespace).
+
 ## 5. Fase 4 — Autoscaling (HPA) sob carga real
 
 O enunciado exige provar 4 coisas específicas sobre o HPA, não só "sobe e
@@ -175,10 +225,17 @@ acidental.
   não são contabilizadas nas métricas de gRPC (interceptor cobre só
   unary).
 
-## Referências (dados brutos, não versionados)
+## Referências
 
-- `evidencias-fase3-k6/fase3-testes-de-carga.md` — campanha local completa, análise por métrica.
-- `evidencias-fase3-k6/fase3-testes-de-carga-remoto.md` — campanha remota completa (seções 0-7: bugs de auth, achado do bug de conexão, retry, fix validado, pendências).
-- `evidencias-fase4-hpa/hpa-scale-up-durante-fase3-remoto.md` — achado original (acidental) do scale-up do HPA.
-- `evidencias-cluster-remoto/prometheus-grafana-grupo-3.md` — instalação e validação do Prometheus/Grafana próprios no cluster remoto.
-- `loadtest/README.md` — como rodar os testes de novo (local ou remoto).
+Este arquivo é a fonte de verdade consolidada (versionada no git). Os
+documentos de análise detalhada por campanha (`evidencias-fase3-k6/*.md`,
+`evidencias-fase4-hpa/*.md`, `evidencias-cluster-remoto/*.md`, incluindo o
+print do Grafana do professor) existiram como notas de sessão durante a
+investigação, mas **não são versionados** (pasta `evidencias-*` no
+`.gitignore`, por design — dados de sessão, não artefatos do projeto) e
+foram removidos do disco depois de consolidados aqui. Os outputs brutos
+mais recentes do k6 (`resultados-remoto-final/`) ficam na mesma pasta,
+gerados de novo a qualquer momento rodando `loadtest/README.md`.
+
+- `loadtest/README.md` — como rodar os testes de novo (local ou remoto), variáveis, limitações conhecidas do script.
+- `k8s/manifests/configs/api-gateway-hpa.yaml` e `patient-data-service-hpa.yaml` — definição dos dois HPAs (repo `k8s`).
