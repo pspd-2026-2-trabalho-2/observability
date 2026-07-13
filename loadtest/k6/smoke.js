@@ -1,43 +1,3 @@
-// Teste de carga do API Gateway com fluxo de autenticação real (Keycloak).
-//
-// Uso (local):
-//   k6 run --env VUS=50 --env DURATION=1m loadtest/k6/smoke.js
-//
-// Uso (cluster remoto grupo-3):
-//   k6 run --env TARGET=remote --env VUS=50 --env DURATION=1m \
-//     --env BASE_URL=https://kiriland.unb.br/grupo3 \
-//     --env KEYCLOAK_URL=https://kiriland.unb.br/keycloak \
-//     --env KEYCLOAK_REALM=grupo03 \
-//     --env KEYCLOAK_CLIENT=pseudopep-frontend \
-//     loadtest/k6/smoke.js
-//
-// Variáveis de ambiente:
-//   TARGET           "local" (default) ou "remote" — escolhe o conjunto de
-//                    usuários de teste (ver USER_PROFILES abaixo)
-//   BASE_URL         URL do api-gateway               (default http://localhost:8090)
-//   KEYCLOAK_URL     URL base do Keycloak              (default http://localhost:8081)
-//   KEYCLOAK_REALM   Realm do Keycloak                 (default hu)
-//   KEYCLOAK_CLIENT  Client ID (público, direct grant) (default hu-frontend)
-//   SAMPLE_CONDITION Código de condição pro cohort     (default DIABETES)
-//   VUS              Usuários virtuais simultâneos     (default 10)
-//   DURATION         Duração do teste                  (default 30s)
-//
-// client_id importa: `admin-cli` NÃO emite realm_access.roles nem
-// preferred_username no access_token (confirmado em ambos os Keycloaks,
-// local e remoto) — é só para a API administrativa do Keycloak, não para
-// login de aplicação. Usar sempre o client "de aplicação" (hu-frontend
-// local, pseudopep-frontend remoto).
-//
-// O paciente de teste NÃO é mais hardcoded: setup() loga como MEDICO e
-// descobre um paciente real via GET /api/me/patients, funciona igual em
-// qualquer ambiente/seed (local ou remoto), sem precisar saber IDs
-// específicos de antemão.
-//
-// Rate limit do gateway: middleware.go usa rate.NewLimiter(10, 20) — 10 req/s
-// sustentados, burst de 20, GLOBAL (todo o gateway, não por usuário/IP). Em
-// VUS mais altos isso vira o teto real de throughput — 429 é o gateway se
-// protegendo sob carga, não um erro de infra. Ver loadtest/README.md.
-
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Counter, Trend, Rate } from "k6/metrics";
@@ -49,13 +9,7 @@ const KEYCLOAK_REALM = __ENV.KEYCLOAK_REALM || "hu";
 const KEYCLOAK_CLIENT = __ENV.KEYCLOAK_CLIENT || "hu-frontend";
 const SAMPLE_CONDITION = __ENV.SAMPLE_CONDITION || "DIABETES";
 
-// Usuários de teste por ambiente. "local": realm `hu` (ver
-// keycloak/README.md) — só med.cardoso tem pacientes/atribuições reais no
-// seed.sql local; est.silva/pesq.souza autenticam e exercitam o fluxo real
-// (JWT + authz + DB), mas tendem a receber DENY/lista vazia por não terem
-// linhas em user_patient_assignments/projects (ver loadtest/README.md).
-// "remote": usuários reais do PDF de orientações do professor (realm
-// `grupo03`, client pseudopep-frontend — NÃO admin-cli).
+
 const USER_PROFILES = {
   local: [
     { username: "med.cardoso", password: "pspd123", role: "MEDICO" },
@@ -74,8 +28,6 @@ export const options = {
   vus: parseInt(__ENV.VUS || "10", 10),
   duration: __ENV.DURATION || "30s",
   thresholds: {
-    // não falha o build de CI — thresholds servem só de referência no
-    // resumo do k6; a análise real é feita comparando os 5 cenários.
     http_req_failed: ["rate<1.0"],
   },
 };
@@ -88,13 +40,6 @@ const gatewayDenied = new Rate("gateway_denied_rate");
 const gatewayRequests = new Counter("gateway_requests_total");
 const loginErrors = new Rate("login_error_rate");
 
-// Cache de token por VU (estado de módulo — cada VU roda sua própria
-// instância do script em k6, então isto persiste entre iterações da mesma
-// VU sem vazar para outras). Evita logar no Keycloak a cada iteração: um
-// usuário real loga uma vez e reusa o token até perto da expiração —
-// replicar "login a cada request" com poucos usuários compartilhados sob
-// carga concorrente sobrecarrega o Keycloak e non-realisticamente aciona
-// proteção de força bruta.
 let cachedToken = null;
 let cachedTokenExpiresAt = 0; // epoch ms
 
@@ -143,13 +88,6 @@ function callGateway(name, path, token) {
   });
   gatewayLatency.add(res.timings.duration);
   gatewayRequests.add(1);
-  // três categorias de resultado, tratadas separadamente para a análise
-  // comparativa entre os 5 níveis de VUs:
-  //  - erro de infra (5xx / conexão): problema real
-  //  - 429: rate limiter global do gateway (10 req/s, burst 20) agindo —
-  //    esperado e cada vez mais frequente conforme VUS sobe
-  //  - 403: DENY de autorização (esperado p/ usuários sem vínculo real de
-  //    paciente/projeto — ver loadtest/README.md)
   const isError = res.status >= 500 || res.status === 0;
   const isRateLimited = res.status === 429;
   const isDenied = res.status === 403;
@@ -163,11 +101,6 @@ function callGateway(name, path, token) {
   return res;
 }
 
-// setup() roda uma vez, fora do contexto das VUs, antes do teste começar.
-// Loga como MEDICO e descobre um paciente real via /api/me/patients — evita
-// hardcodar um patient_id que só existe num ambiente específico (local ou
-// remoto têm datasets diferentes). Fallback pra um ID fixo só se a
-// descoberta falhar (ex.: gateway fora do ar já no setup).
 export function setup() {
   const medico = USERS.find((u) => u.role === "MEDICO") || USERS[0];
   const token = login(medico);
@@ -200,10 +133,6 @@ export function setup() {
   return { patientId };
 }
 
-// Cada VU fica associada a um dos 3 perfis (round-robin por VU id) durante
-// todo o teste. Login acontece só na primeira iteração da VU (ou quando o
-// token cacheado está perto de expirar) — replica o comportamento real do
-// frontend (login -> navegação com o mesmo token).
 export default function (data) {
   const user = USERS[__VU % USERS.length];
   const token = getToken(user);
