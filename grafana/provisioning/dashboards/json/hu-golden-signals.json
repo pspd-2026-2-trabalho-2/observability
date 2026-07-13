@@ -3,7 +3,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -28,9 +28,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(grpc_server_handled_total[1m]))",
+          "expr": "sum by (job) (rate(grpc_server_handled_total[$agrupamento]))",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -41,7 +41,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -66,9 +66,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(grpc_server_handling_seconds_bucket{job=~\"patient-data-service|data-transform-service\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(grpc_server_handling_seconds_bucket{job=~\"patient-data-service|data-transform-service\"}[$agrupamento])))",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -79,7 +79,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -104,18 +104,18 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(grpc_server_handled_total{job!=\"auth-service\", code!=\"OK\"}[5m]))",
+          "expr": "sum by (job) (rate(grpc_server_handled_total{job!=\"auth-service\", code!=\"OK\"}[$agrupamento]))",
           "legendFormat": "{{job}} error",
           "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(grpc_server_handled_total{job=\"auth-service\", grpc_code!=\"OK\"}[5m]))",
+          "expr": "sum by (job) (rate(grpc_server_handled_total{job=\"auth-service\", grpc_code!=\"OK\"}[$agrupamento]))",
           "legendFormat": "{{job}} error",
           "refId": "B"
         }
@@ -126,7 +126,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -151,18 +151,18 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (query) (rate(db_queries_total[1m]))",
+          "expr": "sum by (query) (rate(db_queries_total[$agrupamento]))",
           "legendFormat": "{{query}} ok",
           "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (query) (rate(db_queries_total{status=\"error\"}[1m]))",
+          "expr": "sum by (query) (rate(db_queries_total{status=\"error\"}[$agrupamento]))",
           "legendFormat": "{{query}} error",
           "refId": "B"
         }
@@ -173,7 +173,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -198,9 +198,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, query) (rate(db_query_duration_seconds_bucket[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, query) (rate(db_query_duration_seconds_bucket[$agrupamento])))",
           "legendFormat": "{{query}}",
           "refId": "A"
         }
@@ -211,7 +211,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -236,9 +236,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (operation, level) (rate(fhir_transforms_total[1m]))",
+          "expr": "sum by (operation, level) (rate(fhir_transforms_total[$agrupamento]))",
           "legendFormat": "{{operation}} ({{level}})",
           "refId": "A"
         }
@@ -249,7 +249,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -274,9 +274,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
-          "expr": "sum by (job) (rate(process_cpu_seconds_total[1m]))",
+          "expr": "sum by (job) (rate(process_cpu_seconds_total[$agrupamento]))",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -287,7 +287,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -312,7 +312,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
           "expr": "process_resident_memory_bytes",
           "legendFormat": "{{job}}",
@@ -325,7 +325,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${datasource}"
       },
       "description": "Nº de instâncias ativas (targets UP) por serviço. sum by(job)(up) = 1 por serviço no Compose; no cluster = nº de pods descobertos/réplicas em execução.",
       "fieldConfig": {
@@ -353,7 +353,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${datasource}"
           },
           "expr": "sum by (job) (up)",
           "legendFormat": "{{job}}",
@@ -362,6 +362,53 @@
       ],
       "title": "Instâncias ativas por serviço",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Nº de instâncias ativas (targets UP) do API Gateway — mesmo dado do painel \"Instâncias ativas por serviço\", filtrado só pro gateway.",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "min": 0,
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(up{job=\"api-gateway\"})",
+          "legendFormat": "api-gateway",
+          "refId": "A"
+        }
+      ],
+      "title": "Pods disponíveis (API Gateway)",
+      "type": "stat"
     }
   ],
   "refresh": "10s",
@@ -371,6 +418,48 @@
     "observabilidade",
     "hu"
   ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Fonte de dados",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "1m",
+          "value": "1m"
+        },
+        "hide": 0,
+        "label": "Agrupamento (janela de rate)",
+        "name": "agrupamento",
+        "options": [
+          { "text": "1m", "value": "1m" },
+          { "text": "2m", "value": "2m" },
+          { "text": "5m", "value": "5m" },
+          { "text": "10m", "value": "10m" },
+          { "text": "30m", "value": "30m" },
+          { "text": "1h", "value": "1h" },
+          { "text": "6h", "value": "6h" },
+          { "text": "12h", "value": "12h" },
+          { "text": "1d", "value": "1d" }
+        ],
+        "query": "1m,2m,5m,10m,30m,1h,6h,12h,1d",
+        "queryValue": "",
+        "refresh": 2,
+        "skipUrlSync": false,
+        "type": "interval"
+      }
+    ]
+  },
   "time": {
     "from": "now-15m",
     "to": "now"
